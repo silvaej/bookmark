@@ -60,11 +60,11 @@ export class MongoDbDataSource implements DataSource {
     }
 
     async findOneByIdAndDelete<T extends MovieResponse>(id: string): Promise<DefaultResponse<T>> {
-        const { acknowledged } = await this.db.deleteOne(id)
+        const { acknowledged, deletedCount } = await this.db.deleteOne(id)
         return {
-            acknowledged,
+            acknowledged: acknowledged && !!deletedCount,
             data: null,
-            error: acknowledged ? null : 'Not found',
+            error: acknowledged && !!deletedCount ? null : 'Not found',
         }
     }
 }
