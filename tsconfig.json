@@ -1,0 +1,26 @@
+{
+    "compilerOptions": {
+        "target": "es6" /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */,
+        "module": "commonjs" /* Specify what module code is generated. */,
+        "lib": ["esnext", "dom"],
+        "rootDir": "./" /* Specify the root folder within your source files. */,
+        "moduleResolution": "node",
+        "allowJs": true /* Allow JavaScript files to be a part of your program. Use the 'checkJS' option to get errors from these files. */,
+        "outDir": "./dist" /* Specify an output folder for all emitted files. */,
+        "removeComments": true /* Disable emitting comments. */,
+        "esModuleInterop": true /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables 'allowSyntheticDefaultImports' for type compatibility. */,
+        "baseUrl": ".",
+        "paths": {
+            "@src/*": ["src/*"]
+        },
+        // "typeRoots": ["./node_modules/@types"],
+        // "types": ["express", "morgan", "winston"],
+        "forceConsistentCasingInFileNames": true /* Ensure that casing is correct in imports. */,
+        "strict": true /* Enable all strict type-checking options. */,
+        "noImplicitAny": true,
+        "skipLibCheck": true /* Skip type checking all .d.ts files. */,
+        "resolveJsonModule": true
+    },
+    "exclude": ["test", "node_modules", "dist", "coverage"],
+    "include": ["src/**/*"]
+}

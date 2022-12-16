@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+    nodeapp:
+        container_name: app # Change this
+        image: silvaej/name # Change this
+        build:
+            dockerfile: Dockerfile.dev
+            context: .
+        ports:
+            - '8080:8080'
+        volumes:
+            - '.:/usr/src/app'
+            - /usr/src/app/node_modules
