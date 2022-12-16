@@ -11,7 +11,14 @@
         "esModuleInterop": true /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables 'allowSyntheticDefaultImports' for type compatibility. */,
         "baseUrl": ".",
         "paths": {
-            "@src/*": ["src/*"]
+            "@src/*": ["src/*"],
+            "@data/*": ["src/data/*"],
+            "@interfaces/*": ["src/interfaces/*"],
+            "@models/*": ["src/models/*"],
+            "@repositories/*": ["src/repositories/*"],
+            "@routers/*": ["src/routers/*"],
+            "@use-cases/*": ["src/use-cases/*"],
+            "@utils/*": ["src/utils/*"]
         },
         // "typeRoots": ["./node_modules/@types"],
         // "types": ["express", "morgan", "winston"],

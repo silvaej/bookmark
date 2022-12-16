@@ -1,6 +1,6 @@
 import server from './server'
 import { Logger } from './utils/logger'
-import { getDbConnection } from './data/connections/mongodb-connection'
+import { getDbConnection } from '@data/connections/mongodb-connection'
 
 Logger.setLogger()
 server.use(Logger.httpLogger())
