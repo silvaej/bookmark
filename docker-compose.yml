@@ -2,8 +2,8 @@ version: '3'
 
 services:
     nodeapp:
-        container_name: app # Change this
-        image: silvaej/name # Change this
+        container_name: bookmark # Change this
+        image: silvaej/bookmark # Change this
         build:
             dockerfile: Dockerfile.dev
             context: .
