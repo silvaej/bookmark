@@ -35,9 +35,9 @@ export function createMovieRouter(
     router.get('/', async (req: Request, res: Response) => {
         // For this all filters must be validated first ... same as the  search query
         try {
-            const { filter, search } = req.query
+            const { search, ...filter } = req.query
             if (filter && search && typeof search === 'string') {
-                const result = await retrieve.execute({ filter }, search)
+                const result = await retrieve.execute({ ...filter }, search)
                 Logger.log('info', 'Movie information retrieved')
                 res.status(200).json({ ok: true, data: result })
             }

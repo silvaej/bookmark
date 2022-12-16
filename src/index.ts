@@ -5,7 +5,6 @@ import { MongoDbDataSource } from './data/sources/mongodb-data-source'
 import { MovieRepository } from './repositories/movie-repository'
 import { createMovieRouter } from './routers/movie-router'
 import { AddMovie, DeleteMovie, RetrieveMovies, UpdateMovie } from './use-cases/movies'
-import { Response } from 'express'
 
 Logger.setLogger()
 server.use(Logger.httpLogger())
@@ -26,8 +25,6 @@ server.use(Logger.httpLogger())
     server.use('/movies', movieRoute)
 
     // For common connection
-    server.get('/', (res: Response) =>
-        res.send('Thank you for using this boilerplate for Clean Architecture TS Project.')
-    )
+    server.get('/', (req, res) => res.send('Thank you for using this boilerplate for Clean Architecture TS Project.'))
     server.listen(8080, () => Logger.log('info', 'Server running at localhost:8080'))
 })()
