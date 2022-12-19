@@ -25,6 +25,6 @@ server.use(Logger.httpLogger())
     server.use('/movies', movieRoute)
 
     // For common connection
-    server.get('/', (req, res) => res.send('Thank you for using this boilerplate for Clean Architecture TS Project.'))
+    server.get('/', (req, res) => res.status(200).json({ ok: true }))
     server.listen(8080, () => Logger.log('info', 'Server running at localhost:8080'))
 })()
