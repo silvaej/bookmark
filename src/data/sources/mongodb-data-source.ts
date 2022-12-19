@@ -1,13 +1,19 @@
 import { DataSource } from '@src/interfaces/database/data-source'
 import { DefaultResponse } from '@src/interfaces/database/default-response'
 import { MongoDbWrapper } from '@src/interfaces/database/mongodb-wrapper'
+import { QueryFields } from '@src/interfaces/database/query-fields'
 import { MovieBase, MovieResponse } from '@src/models/Movie'
 import { UserBase, UserResponse } from '@src/models/User'
+import { transformObjectId } from '@src/utils/helper'
 
 export class MongoDbDataSource implements DataSource {
     constructor(private db: MongoDbWrapper) {}
 
-    async find(query: object, search?: string): Promise<DefaultResponse<any>> {
+    async find(query: QueryFields, search?: string): Promise<DefaultResponse<any>> {
+        const { id, uid, ...otherQueries } = query
+        if (id && !uid) {
+            query = { uid: id, ...otherQueries }
+        }
         const queryString = search ? { ...query, $text: { $search: search } } : query
         const results = await this.db.find(queryString)
 

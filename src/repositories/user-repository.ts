@@ -13,4 +13,8 @@ export class UserRepository implements UserRepositoryIf {
     async findUser(email: string): Promise<DefaultResponse<Array<UserResponse>>> {
         return this.source.find({ email })
     }
+
+    async findUserById(id: string): Promise<DefaultResponse<Array<UserResponse>>> {
+        return this.source.find({ id })
+    }
 }

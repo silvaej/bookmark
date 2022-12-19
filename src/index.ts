@@ -7,34 +7,44 @@ import { createMovieRouter } from './routers/movie-router'
 import { AddMovie, DeleteMovie, RetrieveMovies, UpdateMovie } from './use-cases/movies'
 import { UserRepository } from './repositories/user-repository'
 import { createAuthRouter } from './routers/auth-router'
-import { Login } from './use-cases/auth/login'
-import { Signup } from './use-cases/auth/signup'
+import { Login, Signup } from './use-cases/auth'
+import { Request, Response } from 'express'
 
 Logger.setLogger()
 server.use(Logger.httpLogger())
 
+import dotenv from 'dotenv'
+dotenv.config()
+
 /** ESTABLISHING HTTP CONNECTION */
 ;(async () => {
-    const db = await getDbConnection()
+    let db
+    try {
+        db = await getDbConnection()
+    } catch (err) {
+        if (err instanceof Error) Logger.log('error', err.message)
+    }
 
-    // Configuring auth route
-    const authSource = new MongoDbDataSource(new MongoDB(db, 'USERS'))
-    const authRepo = new UserRepository(authSource)
-    const authRoute = createAuthRouter(new Login(authRepo), new Signup(authRepo))
-    server.use('/auth', authRoute)
+    if (db) {
+        // Configuring auth route
+        const authSource = new MongoDbDataSource(new MongoDB(db, 'USERS'))
+        const authRepo = new UserRepository(authSource)
+        const authRoute = createAuthRouter(new Login(authRepo), new Signup(authRepo))
+        server.use('/auth', authRoute)
 
-    // Configuring movie route
-    const movieSource = new MongoDbDataSource(new MongoDB(db, 'MOVIES'))
-    const movieRepo = new MovieRepository(movieSource)
-    const movieRoute = createMovieRouter(
-        new AddMovie(movieRepo),
-        new RetrieveMovies(movieRepo),
-        new UpdateMovie(movieRepo),
-        new DeleteMovie(movieRepo)
-    )
-    server.use('/movies', movieRoute)
+        // Configuring movie route
+        const movieSource = new MongoDbDataSource(new MongoDB(db, 'MOVIES'))
+        const movieRepo = new MovieRepository(movieSource)
+        const movieRoute = createMovieRouter(
+            new AddMovie(movieRepo),
+            new RetrieveMovies(movieRepo),
+            new UpdateMovie(movieRepo),
+            new DeleteMovie(movieRepo)
+        )
+        server.use('/movies', movieRoute)
+    }
 
     // For common connection
-    server.get('/', (req, res) => res.status(200).json({ ok: true }))
+    server.get('/', (req: Request, res: Response) => res.status(200).json({ ok: true }))
     server.listen(8080, () => Logger.log('info', 'Server running at localhost:8080'))
 })()

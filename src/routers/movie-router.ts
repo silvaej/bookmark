@@ -7,6 +7,7 @@ import {
     RetrieveMoviesUseCaseIf,
     UpdateMovieUseCaseIf,
 } from '@src/interfaces/use-cases/movies'
+import * as jwt from 'njwt'
 Logger.setLogger()
 
 export function createMovieRouter(
@@ -36,8 +37,17 @@ export function createMovieRouter(
     /** RETRIEVE MOVIES ROUTE */
     router.get('/', async (req: Request, res: Response) => {
         try {
+            const token = req.headers['authorization']?.split(' ')[1]
+            if (!token) {
+                res.status(401).json({ ok: false, error: 'Logged out' })
+                return
+            }
+            const user = jwt.verify(token!, process.env.ACCESS_TOKEN_SECRET)?.body.toJSON()
+
+            const id = { ...user }.id
+
             const { search, ...filter } = req.query
-            const result = await retrieve.execute({ ...filter }, search && typeof search === 'string' ? search : '')
+            const result = await retrieve.execute({ ...filter, id }, search && typeof search === 'string' ? search : '')
             Logger.log('info', 'Movie information retrieved')
             res.status(200).json({ ok: true, data: result })
         } catch (err) {

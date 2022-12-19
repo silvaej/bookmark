@@ -1,6 +1,7 @@
 import { LoginUseCaseIf, SignUpUseCaseIf } from '@src/interfaces/use-cases/auth'
 import { Logger } from '@src/utils/logger'
 import { Router, Request, Response } from 'express'
+import * as jwt from 'njwt'
 
 export function createAuthRouter(login: LoginUseCaseIf, register: SignUpUseCaseIf): Router {
     const router = Router()
@@ -27,7 +28,9 @@ export function createAuthRouter(login: LoginUseCaseIf, register: SignUpUseCaseI
             if (email && typeof email === 'string' && password && typeof password === 'string') {
                 const result = await login.execute(email, password)
                 Logger.log('info', `User ${result.username} with id ${result.id} is logged in successfuly.`)
-                res.status(200).json(result)
+
+                const token = jwt.create({ ...result }, process.env.ACCESS_TOKEN_SECRET).compact()
+                res.status(200).json({ ok: true, token })
                 return
             }
             Logger.log('warn', 'Missing query parameter/s')
