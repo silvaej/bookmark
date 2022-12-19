@@ -1,4 +1,4 @@
-import express, { Request, Response, Router } from 'express'
+import { Request, Response, Router } from 'express'
 import { Logger } from '@src/utils/logger'
 import { MovieValidator } from '@src/utils/validate'
 import {
@@ -14,8 +14,8 @@ export function createMovieRouter(
     retrieve: RetrieveMoviesUseCaseIf,
     update: UpdateMovieUseCaseIf,
     remove: DeleteMovieUseCaseIf
-): express.Router {
-    const router = express.Router()
+): Router {
+    const router = Router()
 
     /** ADD MOVIE ROUTE */
     router.post('/', async (req: Request, res: Response) => {
@@ -80,7 +80,7 @@ export function createMovieRouter(
         }
     })
 
-    /** PREVENT OTHER ROUTE */
+    /** PREVENT OTHER REQUEST TYPE */
     router.all('/', (res: Response) => {
         Logger.log('warn', 'Request method not allowed/implemented.')
         res.status(501).end()

@@ -1,6 +1,8 @@
 import { Db, DeleteResult, Document, InsertOneResult, MongoClient, ObjectId, UpdateResult } from 'mongodb'
 import { MongoDbWrapper } from '@src/interfaces/database/mongodb-wrapper'
 import { Logger } from '@src/utils/logger'
+import { UserResponse } from '@src/models/User'
+import { MovieResponse } from '@src/models/Movie'
 Logger.setLogger()
 
 export class MongoDB implements MongoDbWrapper {
@@ -9,7 +11,11 @@ export class MongoDB implements MongoDbWrapper {
     }
 
     async find(query: object): Promise<Array<any>> {
-        return await this.db.collection(this.collection).find(query).toArray()
+        const results = await this.db.collection(this.collection).find(query).toArray()
+        return results.map(item => {
+            const { _id, ...rest } = item
+            return { id: _id.toString(), ...rest }
+        })
     }
 
     async insertOne(doc: any): Promise<InsertOneResult<Document>> {
