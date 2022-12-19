@@ -1,5 +1,6 @@
 import express, { Request, Response, Router } from 'express'
 import { Logger } from '@src/utils/logger'
+import { MovieValidator } from '@src/utils/validate'
 import {
     AddMovieUseCaseIf,
     DeleteMovieUseCaseIf,
@@ -19,8 +20,9 @@ export function createMovieRouter(
     /** ADD MOVIE ROUTE */
     router.post('/', async (req: Request, res: Response) => {
         try {
-            // request body is needed to be validate (validate if all required fields are present) before executing the function
-            await add.execute(req.body)
+            const movieRequest = req.body
+            MovieValidator.validateRequest(movieRequest)
+            await add.execute(movieRequest)
             Logger.log('info', 'Succesfully added movie to the database.')
             res.status(201).json({ ok: true })
         } catch (err) {
@@ -33,14 +35,11 @@ export function createMovieRouter(
 
     /** RETRIEVE MOVIES ROUTE */
     router.get('/', async (req: Request, res: Response) => {
-        // For this all filters must be validated first ... same as the  search query
         try {
             const { search, ...filter } = req.query
-            if (filter && search && typeof search === 'string') {
-                const result = await retrieve.execute({ ...filter }, search)
-                Logger.log('info', 'Movie information retrieved')
-                res.status(200).json({ ok: true, data: result })
-            }
+            const result = await retrieve.execute({ ...filter }, search && typeof search === 'string' ? search : '')
+            Logger.log('info', 'Movie information retrieved')
+            res.status(200).json({ ok: true, data: result })
         } catch (err) {
             if (err instanceof Error) {
                 Logger.log('error', err.message)
@@ -54,6 +53,7 @@ export function createMovieRouter(
         try {
             // The updated movie info needs to be validated as well
             const updatedMovieInfo = req.body
+            MovieValidator.validateResponse(updatedMovieInfo)
             await update.execute(updatedMovieInfo)
             Logger.log('info', `Movie with an id of ${updatedMovieInfo.id} has been updated`)
             res.status(200).json({ message: `Movie with an id of ${updatedMovieInfo.id} has been updated` })
