@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
-        "target": "es6" /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */,
-        "module": "commonjs" /* Specify what module code is generated. */,
+        "target": "es2017" /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */,
+        "module": "CommonJS" /* Specify what module code is generated. */,
         "lib": ["esnext", "dom"],
         "rootDir": "./" /* Specify the root folder within your source files. */,
         "moduleResolution": "node",
@@ -18,9 +18,10 @@
             "@repositories/*": ["src/repositories/*"],
             "@routers/*": ["src/routers/*"],
             "@use-cases/*": ["src/use-cases/*"],
-            "@utils/*": ["src/utils/*"]
+            "@utils/*": ["src/utils/*"],
+            "@config/*": ["config/*"]
         },
-        // "typeRoots": ["./node_modules/@types"],
+        "typeRoots": ["./node_modules/@types"],
         // "types": ["express", "morgan", "winston"],
         "forceConsistentCasingInFileNames": true /* Ensure that casing is correct in imports. */,
         "strict": true /* Enable all strict type-checking options. */,

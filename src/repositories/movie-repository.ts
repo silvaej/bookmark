@@ -19,7 +19,7 @@ export class MovieRepository implements MovieRepositoryIf {
         return this.source.findOneByIdAndUpdate(id, info)
     }
 
-    async deleteMovie(id: string): Promise<DefaultResponse<MovieResponse>> {
-        return this.source.findOneByIdAndDelete(id)
+    async deleteMovie(id: string, uid: string): Promise<DefaultResponse<MovieResponse>> {
+        return this.source.findOneByIdAndDelete(id, uid)
     }
 }

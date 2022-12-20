@@ -9,15 +9,19 @@ export class MongoDB implements MongoDbWrapper {
     }
 
     async find(query: object): Promise<Array<any>> {
-        return await this.db.collection(this.collection).find(query).toArray()
+        const results = await this.db.collection(this.collection).find(query).toArray()
+        return results.map(item => {
+            const { _id, ...rest } = item
+            return { id: _id.toString(), ...rest }
+        })
     }
 
     async insertOne(doc: any): Promise<InsertOneResult<Document>> {
         return await this.db.collection(this.collection).insertOne(doc)
     }
 
-    async deleteOne(id: string): Promise<DeleteResult> {
-        return await this.db.collection(this.collection).deleteOne({ _id: new ObjectId(id) })
+    async deleteOne(id: string, uid: string): Promise<DeleteResult> {
+        return await this.db.collection(this.collection).deleteOne({ _id: new ObjectId(id), uid })
     }
 
     async updateOne(id: string, data: object): Promise<UpdateResult> {

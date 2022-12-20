@@ -9,7 +9,7 @@ export class MovieValidator {
 
     public static validateResponse(movie: MovieResponse) {
         this.validateProps(movie)
-        if (!movie.id || typeof movie.id === 'string') throw new Error('Id parameter missing')
+        if (!movie.id || typeof movie.id !== 'string') throw new Error('Id parameter missing')
     }
 
     private static validateProps(movie: MovieBase) {

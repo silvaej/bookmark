@@ -1,4 +1,4 @@
-import express, { Request, Response, Router } from 'express'
+import { Request, Response, Router } from 'express'
 import { Logger } from '@src/utils/logger'
 import { MovieValidator } from '@src/utils/validate'
 import {
@@ -7,6 +7,8 @@ import {
     RetrieveMoviesUseCaseIf,
     UpdateMovieUseCaseIf,
 } from '@src/interfaces/use-cases/movies'
+import * as jwt from 'njwt'
+import { authorize } from '@src/middlewares/authorize'
 Logger.setLogger()
 
 export function createMovieRouter(
@@ -14,13 +16,13 @@ export function createMovieRouter(
     retrieve: RetrieveMoviesUseCaseIf,
     update: UpdateMovieUseCaseIf,
     remove: DeleteMovieUseCaseIf
-): express.Router {
-    const router = express.Router()
+): Router {
+    const router = Router()
 
     /** ADD MOVIE ROUTE */
-    router.post('/', async (req: Request, res: Response) => {
+    router.post('/', authorize, async (req: Request, res: Response) => {
         try {
-            const movieRequest = req.body
+            const movieRequest = { ...req.body, uid: res.locals.uid }
             MovieValidator.validateRequest(movieRequest)
             await add.execute(movieRequest)
             Logger.log('info', 'Succesfully added movie to the database.')
@@ -34,10 +36,12 @@ export function createMovieRouter(
     })
 
     /** RETRIEVE MOVIES ROUTE */
-    router.get('/', async (req: Request, res: Response) => {
+    router.get('/', authorize, async (req: Request, res: Response) => {
         try {
+            const id = res.locals.uid
+
             const { search, ...filter } = req.query
-            const result = await retrieve.execute({ ...filter }, search && typeof search === 'string' ? search : '')
+            const result = await retrieve.execute({ ...filter, id }, search && typeof search === 'string' ? search : '')
             Logger.log('info', 'Movie information retrieved')
             res.status(200).json({ ok: true, data: result })
         } catch (err) {
@@ -49,10 +53,10 @@ export function createMovieRouter(
     })
 
     /** UPDATE MOVIE ROUTE */
-    router.put('/', async (req: Request, res: Response) => {
+    router.put('/', authorize, async (req: Request, res: Response) => {
         try {
             // The updated movie info needs to be validated as well
-            const updatedMovieInfo = req.body
+            const updatedMovieInfo = { ...req.body, uid: res.locals.uid }
             MovieValidator.validateResponse(updatedMovieInfo)
             await update.execute(updatedMovieInfo)
             Logger.log('info', `Movie with an id of ${updatedMovieInfo.id} has been updated`)
@@ -66,10 +70,10 @@ export function createMovieRouter(
     })
 
     /** DELETE MOVIE ROUTE */
-    router.delete('/:id', async (req: Request, res: Response) => {
+    router.delete('/:id', authorize, async (req: Request, res: Response) => {
         try {
             const { id } = req.params
-            await remove.execute(id)
+            await remove.execute(id, res.locals.uid)
             Logger.log('info', `Movie with an id of ${id} has been deleted`)
             res.status(200).json({ message: `Movie with an id of ${id} has been deleted` })
         } catch (err) {
@@ -80,7 +84,7 @@ export function createMovieRouter(
         }
     })
 
-    /** PREVENT OTHER ROUTE */
+    /** PREVENT OTHER REQUEST TYPE */
     router.all('/', (res: Response) => {
         Logger.log('warn', 'Request method not allowed/implemented.')
         res.status(501).end()

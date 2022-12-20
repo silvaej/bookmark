@@ -1,12 +1,8 @@
-FROM node:16.17-alpine3.15
+FROM node:18
 # Set the working directory
 WORKDIR /usr/src/app
 # Install typescript so I have access to tsc command
 RUN npm i typescript
-# Set the NODE_ENV variable to development so we can also install the dev dependencies
-ENV NODE_ENV=development
-ENV MONGODB_SECRET=fhE72ssi0jpbkk6W
-ENV MONGODB_USERNAME=bookmark-admin
 # Copy the package.json and package-lock.json to install the dependencies
 COPY package.json package-lock.json ./
 RUN npm i 
