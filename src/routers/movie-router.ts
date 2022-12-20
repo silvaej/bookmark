@@ -57,7 +57,6 @@ export function createMovieRouter(
         try {
             // The updated movie info needs to be validated as well
             const updatedMovieInfo = { ...req.body, uid: res.locals.uid }
-            console.log(updatedMovieInfo)
             MovieValidator.validateResponse(updatedMovieInfo)
             await update.execute(updatedMovieInfo)
             Logger.log('info', `Movie with an id of ${updatedMovieInfo.id} has been updated`)
