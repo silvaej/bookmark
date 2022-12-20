@@ -8,6 +8,7 @@ import {
     UpdateMovieUseCaseIf,
 } from '@src/interfaces/use-cases/movies'
 import * as jwt from 'njwt'
+import { authorize } from '@src/middlewares/authorize'
 Logger.setLogger()
 
 export function createMovieRouter(
@@ -19,9 +20,9 @@ export function createMovieRouter(
     const router = Router()
 
     /** ADD MOVIE ROUTE */
-    router.post('/', async (req: Request, res: Response) => {
+    router.post('/', authorize, async (req: Request, res: Response) => {
         try {
-            const movieRequest = req.body
+            const movieRequest = { ...req.body, uid: res.locals.uid }
             MovieValidator.validateRequest(movieRequest)
             await add.execute(movieRequest)
             Logger.log('info', 'Succesfully added movie to the database.')
@@ -35,16 +36,9 @@ export function createMovieRouter(
     })
 
     /** RETRIEVE MOVIES ROUTE */
-    router.get('/', async (req: Request, res: Response) => {
+    router.get('/', authorize, async (req: Request, res: Response) => {
         try {
-            const token = req.headers['authorization']?.split(' ')[1]
-            if (!token) {
-                res.status(401).json({ ok: false, error: 'Logged out' })
-                return
-            }
-            const user = jwt.verify(token!, process.env.ACCESS_TOKEN_SECRET)?.body.toJSON()
-
-            const id = { ...user }.id
+            const id = res.locals.uid
 
             const { search, ...filter } = req.query
             const result = await retrieve.execute({ ...filter, id }, search && typeof search === 'string' ? search : '')
@@ -59,10 +53,11 @@ export function createMovieRouter(
     })
 
     /** UPDATE MOVIE ROUTE */
-    router.put('/', async (req: Request, res: Response) => {
+    router.put('/', authorize, async (req: Request, res: Response) => {
         try {
             // The updated movie info needs to be validated as well
-            const updatedMovieInfo = req.body
+            const updatedMovieInfo = { ...req.body, uid: res.locals.uid }
+            console.log(updatedMovieInfo)
             MovieValidator.validateResponse(updatedMovieInfo)
             await update.execute(updatedMovieInfo)
             Logger.log('info', `Movie with an id of ${updatedMovieInfo.id} has been updated`)
@@ -76,10 +71,10 @@ export function createMovieRouter(
     })
 
     /** DELETE MOVIE ROUTE */
-    router.delete('/:id', async (req: Request, res: Response) => {
+    router.delete('/:id', authorize, async (req: Request, res: Response) => {
         try {
             const { id } = req.params
-            await remove.execute(id)
+            await remove.execute(id, res.locals.uid)
             Logger.log('info', `Movie with an id of ${id} has been deleted`)
             res.status(200).json({ message: `Movie with an id of ${id} has been deleted` })
         } catch (err) {

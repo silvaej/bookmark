@@ -21,7 +21,7 @@
             "@utils/*": ["src/utils/*"],
             "@config/*": ["config/*"]
         },
-        // "typeRoots": ["./node_modules/@types"],
+        "typeRoots": ["./node_modules/@types"],
         // "types": ["express", "morgan", "winston"],
         "forceConsistentCasingInFileNames": true /* Ensure that casing is correct in imports. */,
         "strict": true /* Enable all strict type-checking options. */,

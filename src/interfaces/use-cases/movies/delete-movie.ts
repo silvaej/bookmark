@@ -1,3 +1,3 @@
 export interface DeleteMovieUseCaseIf {
-    execute(id: string): Promise<void>
+    execute(id: string, uid: string): Promise<void>
 }

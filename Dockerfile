@@ -1,4 +1,4 @@
-FROM node:18-alpine3.17
+FROM node:18
 # Set the working directory
 WORKDIR /usr/src/app
 # Install typescript so I have access to tsc command

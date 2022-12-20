@@ -1,8 +1,6 @@
 import { Db, DeleteResult, Document, InsertOneResult, MongoClient, ObjectId, UpdateResult } from 'mongodb'
 import { MongoDbWrapper } from '@src/interfaces/database/mongodb-wrapper'
 import { Logger } from '@src/utils/logger'
-import { UserResponse } from '@src/models/User'
-import { MovieResponse } from '@src/models/Movie'
 Logger.setLogger()
 
 export class MongoDB implements MongoDbWrapper {
@@ -22,8 +20,8 @@ export class MongoDB implements MongoDbWrapper {
         return await this.db.collection(this.collection).insertOne(doc)
     }
 
-    async deleteOne(id: string): Promise<DeleteResult> {
-        return await this.db.collection(this.collection).deleteOne({ _id: new ObjectId(id) })
+    async deleteOne(id: string, uid: string): Promise<DeleteResult> {
+        return await this.db.collection(this.collection).deleteOne({ _id: new ObjectId(id), uid })
     }
 
     async updateOne(id: string, data: object): Promise<UpdateResult> {

@@ -65,8 +65,11 @@ export class MongoDbDataSource implements DataSource {
         return response
     }
 
-    async findOneByIdAndDelete<T extends MovieResponse | UserResponse>(id: string): Promise<DefaultResponse<T>> {
-        const { acknowledged, deletedCount } = await this.db.deleteOne(id)
+    async findOneByIdAndDelete<T extends MovieResponse | UserResponse>(
+        id: string,
+        uid: string
+    ): Promise<DefaultResponse<T>> {
+        const { acknowledged, deletedCount } = await this.db.deleteOne(id, uid)
         return {
             acknowledged: acknowledged && !!deletedCount,
             data: null,

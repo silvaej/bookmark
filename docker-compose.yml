@@ -5,7 +5,7 @@ services:
         container_name: bookmark # Change this
         image: silvaej/bookmark # Change this
         env_file:
-            - ./config/.env.dev
+            - ./.env
         build:
             dockerfile: Dockerfile
             context: .
