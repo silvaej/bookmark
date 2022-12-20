@@ -29,7 +29,10 @@ export function createAuthRouter(login: LoginUseCaseIf, register: SignUpUseCaseI
                 const result = await login.execute(email, password)
                 Logger.log('info', `User ${result.username} with id ${result.id} is logged in successfuly.`)
 
-                const token = jwt.create({ ...result }, process.env.ACCESS_TOKEN_SECRET).compact()
+                const token = jwt
+                    .create({ ...result }, process.env.ACCESS_TOKEN_SECRET)
+                    .setExpiration(new Date().getTime() + 60 * 60 * 1000 * 12)
+                    .compact()
                 res.status(200).json({ ok: true, token })
                 return
             }
