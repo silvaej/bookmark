@@ -6,4 +6,5 @@ export interface MovieRepositoryIf {
     retrieveMovies(filter: object, search?: string): Promise<DefaultResponse<Array<MovieResponse>>>
     updateMovie(updatedInfo: MovieResponse): Promise<DefaultResponse<MovieResponse>>
     deleteMovie(id: string, uid: string): Promise<DefaultResponse<MovieResponse>>
+    deleteAllMovies(uid: string): Promise<DefaultResponse<MovieResponse>>
 }

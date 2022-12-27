@@ -16,4 +16,5 @@ export interface DataSource {
     ): Promise<DefaultResponse<U>>
     /** Find one existing record by id then delete the record if exists */
     findOneByIdAndDelete<T extends MovieResponse | UserResponse>(id: string, uid: string): Promise<DefaultResponse<T>>
+    deleteAll<T extends MovieResponse | UserResponse>(uid: string): Promise<DefaultResponse<T>>
 }

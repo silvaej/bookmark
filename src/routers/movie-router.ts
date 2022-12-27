@@ -9,13 +9,17 @@ import {
 } from '@src/interfaces/use-cases/movies'
 import { authorize } from '@src/middlewares/authorize'
 import { ValidationError } from '@src/utils/error'
+import { GetMovieDetailsUseCaseIf } from '@src/interfaces/use-cases/movies/get-movie-details'
+import { DeleteAllMovieUseCaseIf } from '@src/interfaces/use-cases/movies/delete-all'
 Logger.setLogger()
 
 export function createMovieRouter(
     add: AddMovieUseCaseIf,
     retrieve: RetrieveMoviesUseCaseIf,
     update: UpdateMovieUseCaseIf,
-    remove: DeleteMovieUseCaseIf
+    remove: DeleteMovieUseCaseIf,
+    get: GetMovieDetailsUseCaseIf,
+    deleteAll: DeleteAllMovieUseCaseIf
 ): Router {
     const router = Router()
 
@@ -76,6 +80,29 @@ export function createMovieRouter(
         }
     })
 
+    /** GET SPECIFIC MOVIE USING THEIR ID */
+    router.get('/:id', authorize, async (req: Request, res: Response) => {
+        try {
+            const { id } = req.params
+            const { uid } = res.locals
+
+            const response = await get.execute(id, uid)
+            Logger.log('info', 'Movie information retrieved')
+            res.status(200).json({ ok: true, data: response })
+        } catch (err) {
+            if (err instanceof Error) {
+                if (err.message === 'NotFound') {
+                    Logger.log('info', err.message)
+                    res.status(404).json({ ok: false, error: 'Resources not found' })
+                    return
+                }
+
+                Logger.log('error', err.message)
+                res.status(500).json({ ok: false, error: err.message })
+            }
+        }
+    })
+
     /** UPDATE MOVIE ROUTE */
     router.put('/', authorize, async (req: Request, res: Response) => {
         try {
@@ -84,7 +111,7 @@ export function createMovieRouter(
             MovieValidator.validateResponse(updatedMovieInfo)
             await update.execute(updatedMovieInfo)
             Logger.log('info', `Movie with an id of ${updatedMovieInfo.id} has been updated`)
-            res.status(204).json({ ok: true, message: `Movie with an id of ${updatedMovieInfo.id} has been updated` })
+            res.status(204).end()
         } catch (err) {
             if (err instanceof Error) {
                 if (err instanceof ValidationError) {
@@ -111,7 +138,7 @@ export function createMovieRouter(
             const { id } = req.params
             await remove.execute(id, res.locals.uid)
             Logger.log('info', `Movie with an id of ${id} has been deleted`)
-            res.status(204).json({ ok: true, message: `Movie with an id of ${id} has been deleted` })
+            res.status(204).end()
         } catch (err) {
             if (err instanceof Error) {
                 if (err.message === 'NotFound') {
@@ -120,6 +147,26 @@ export function createMovieRouter(
                     return
                 }
 
+                Logger.log('error', err.message)
+                res.status(500).json({ ok: false, error: err.message })
+            }
+        }
+    })
+
+    /** DELETE ALL MOVIE ENTRIES OF THE USER */
+    router.delete('/', authorize, async (req: Request, res: Response) => {
+        try {
+            const { uid } = res.locals
+            await deleteAll.execute(uid)
+            Logger.log('info', `All movies from the user ${uid} deleted`)
+            res.status(204).end()
+        } catch (err) {
+            if (err instanceof Error) {
+                if (err.message === 'NotFound') {
+                    Logger.log('info', err.message)
+                    res.status(404).json({ ok: false, error: 'Resources not found' })
+                    return
+                }
                 Logger.log('error', err.message)
                 res.status(500).json({ ok: false, error: err.message })
             }

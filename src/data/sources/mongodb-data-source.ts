@@ -9,12 +9,21 @@ import { transformObjectId } from '@src/utils/helper'
 export class MongoDbDataSource implements DataSource {
     constructor(private db: MongoDbWrapper) {}
 
-    async find(query: QueryFields, search?: string): Promise<DefaultResponse<any>> {
+    async find(
+        query: QueryFields | any /**TODO Need to chnage this */,
+        search?: string
+    ): Promise<DefaultResponse<any>> {
         const { id, uid, ...otherQueries } = query
         if (id && !uid) {
             query = { uid: id, ...otherQueries }
         }
+
+        if (id && uid) {
+            query = { uid, _id: transformObjectId(id), ...otherQueries }
+        }
+
         const queryString = search ? { ...query, $text: { $search: search } } : query
+
         let results = await this.db.find(queryString)
 
         if (results.length)
@@ -70,6 +79,15 @@ export class MongoDbDataSource implements DataSource {
         uid: string
     ): Promise<DefaultResponse<T>> {
         const { acknowledged, deletedCount } = await this.db.deleteOne(id, uid)
+        return {
+            acknowledged: acknowledged && !!deletedCount,
+            data: null,
+            error: acknowledged && !!deletedCount ? null : 'NotFound',
+        }
+    }
+
+    async deleteAll<T extends MovieResponse | UserResponse>(uid: string): Promise<DefaultResponse<T>> {
+        const { acknowledged, deletedCount } = await this.db.deleteMany(uid)
         return {
             acknowledged: acknowledged && !!deletedCount,
             data: null,

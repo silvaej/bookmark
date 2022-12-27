@@ -24,6 +24,10 @@ export class MongoDB implements MongoDbWrapper {
         return await this.db.collection(this.collection).deleteOne({ _id: new ObjectId(id), uid })
     }
 
+    async deleteMany(uid: string): Promise<DeleteResult> {
+        return await this.db.collection(this.collection).deleteMany({ uid })
+    }
+
     async updateOne(id: string, data: object): Promise<UpdateResult> {
         return await this.db.collection(this.collection).updateOne({ _id: new ObjectId(id) }, data)
     }
