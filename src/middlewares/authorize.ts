@@ -7,8 +7,13 @@ export const authorize = (req: Request, res: Response, next: NextFunction) => {
         res.status(401).json({ ok: false, error: 'Logged out' })
         return
     }
-    const user = jwt.verify(token!, process.env.ACCESS_TOKEN_SECRET)?.body.toJSON()
-    const id = { ...user }.id
-    res.locals.uid = id
-    next()
+    try {
+        const user = jwt.verify(token!, process.env.ACCESS_TOKEN_SECRET)?.body.toJSON()
+
+        const id = { ...user }.id
+        res.locals.uid = id
+        next()
+    } catch (err) {
+        res.status(401).json({ ok: false, error: 'Token Expired' })
+    }
 }

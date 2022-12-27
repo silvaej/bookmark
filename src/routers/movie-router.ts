@@ -7,8 +7,8 @@ import {
     RetrieveMoviesUseCaseIf,
     UpdateMovieUseCaseIf,
 } from '@src/interfaces/use-cases/movies'
-import * as jwt from 'njwt'
 import { authorize } from '@src/middlewares/authorize'
+import { ValidationError } from '@src/utils/error'
 Logger.setLogger()
 
 export function createMovieRouter(
@@ -29,6 +29,12 @@ export function createMovieRouter(
             res.status(201).json({ ok: true })
         } catch (err) {
             if (err instanceof Error) {
+                if (err instanceof ValidationError) {
+                    Logger.log('info', err.message)
+                    res.status(400).json({ ok: false, error: err.message })
+                    return
+                }
+
                 Logger.log('error', err.message)
                 res.status(500).json({ ok: false, error: err.message })
             }
@@ -40,12 +46,24 @@ export function createMovieRouter(
         try {
             const id = res.locals.uid
 
-            const { search, ...filter } = req.query
-            const result = await retrieve.execute({ ...filter, id }, search && typeof search === 'string' ? search : '')
+            const { page, limit, search, ...filter } = req.query
+            const parsedLimit = limit ? Number(limit) : undefined
+            const parsedPage = page ? Number(page) : undefined
+            const data = await retrieve.execute(
+                { ...filter, id },
+                search && typeof search === 'string' ? search : '',
+                parsedLimit,
+                parsedPage
+            )
             Logger.log('info', 'Movie information retrieved')
-            res.status(200).json({ ok: true, data: result })
+            res.status(200).json({ ok: true, ...data })
         } catch (err) {
             if (err instanceof Error) {
+                if (err.message === 'NotFound') {
+                    Logger.log('info', err.message)
+                    res.status(404).json({ ok: false, error: 'Resources not found' })
+                    return
+                }
                 Logger.log('error', err.message)
                 res.status(500).json({ ok: false, error: err.message })
             }
@@ -60,9 +78,21 @@ export function createMovieRouter(
             MovieValidator.validateResponse(updatedMovieInfo)
             await update.execute(updatedMovieInfo)
             Logger.log('info', `Movie with an id of ${updatedMovieInfo.id} has been updated`)
-            res.status(200).json({ message: `Movie with an id of ${updatedMovieInfo.id} has been updated` })
+            res.status(204).json({ ok: true, message: `Movie with an id of ${updatedMovieInfo.id} has been updated` })
         } catch (err) {
             if (err instanceof Error) {
+                if (err instanceof ValidationError) {
+                    Logger.log('info', err.message)
+                    res.status(400).json({ ok: false, error: err.message })
+                    return
+                }
+
+                if (err.message === 'NotFound') {
+                    Logger.log('info', err.message)
+                    res.status(404).json({ ok: false, error: 'Resources not found' })
+                    return
+                }
+
                 Logger.log('error', err.message)
                 res.status(500).json({ ok: false, error: err.message })
             }
@@ -75,9 +105,15 @@ export function createMovieRouter(
             const { id } = req.params
             await remove.execute(id, res.locals.uid)
             Logger.log('info', `Movie with an id of ${id} has been deleted`)
-            res.status(200).json({ message: `Movie with an id of ${id} has been deleted` })
+            res.status(204).json({ ok: true, message: `Movie with an id of ${id} has been deleted` })
         } catch (err) {
             if (err instanceof Error) {
+                if (err.message === 'NotFound') {
+                    Logger.log('info', err.message)
+                    res.status(404).json({ ok: false, error: 'Resources not found' })
+                    return
+                }
+
                 Logger.log('error', err.message)
                 res.status(500).json({ ok: false, error: err.message })
             }
@@ -85,9 +121,9 @@ export function createMovieRouter(
     })
 
     /** PREVENT OTHER REQUEST TYPE */
-    router.all('/', (res: Response) => {
+    router.all('/', (req: Request, res: Response) => {
         Logger.log('warn', 'Request method not allowed/implemented.')
-        res.status(501).end()
+        res.status(501).json({ ok: false, reason: 'Not implemented' })
     })
 
     return router

@@ -7,6 +7,6 @@ export class UpdateMovie implements UpdateMovieUseCaseIf {
 
     async execute(movie: MovieResponse): Promise<void> {
         const result = await this.repository.updateMovie(movie)
-        if (!result.acknowledged) throw new Error(result.error!)
+        if (!result.acknowledged) throw new Error(result.error!) // 500
     }
 }

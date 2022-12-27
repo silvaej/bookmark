@@ -15,7 +15,7 @@ export class MongoDbDataSource implements DataSource {
             query = { uid: id, ...otherQueries }
         }
         const queryString = search ? { ...query, $text: { $search: search } } : query
-        const results = await this.db.find(queryString)
+        let results = await this.db.find(queryString)
 
         if (results.length)
             return {
@@ -26,7 +26,7 @@ export class MongoDbDataSource implements DataSource {
         return {
             acknowledged: false,
             data: null,
-            error: 'No result',
+            error: 'NotFound',
         }
     }
 
@@ -57,7 +57,7 @@ export class MongoDbDataSource implements DataSource {
             return response
         }
         if (matchedCount === 0) {
-            response.error = 'Not found'
+            response.error = 'NotFound'
             return response
         }
 
@@ -73,7 +73,7 @@ export class MongoDbDataSource implements DataSource {
         return {
             acknowledged: acknowledged && !!deletedCount,
             data: null,
-            error: acknowledged && !!deletedCount ? null : 'Not found',
+            error: acknowledged && !!deletedCount ? null : 'NotFound',
         }
     }
 }
