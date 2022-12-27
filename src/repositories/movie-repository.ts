@@ -22,4 +22,8 @@ export class MovieRepository implements MovieRepositoryIf {
     async deleteMovie(id: string, uid: string): Promise<DefaultResponse<MovieResponse>> {
         return this.source.findOneByIdAndDelete(id, uid)
     }
+
+    async deleteAllMovies(uid: string): Promise<DefaultResponse<MovieResponse>> {
+        return this.source.deleteAll(uid)
+    }
 }

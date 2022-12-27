@@ -14,6 +14,8 @@ Logger.setLogger()
 server.use(Logger.httpLogger())
 
 import dotenv from 'dotenv'
+import { GetMovieDetails } from './use-cases/movies/get-movie-details'
+import { DeleteAllMovies } from './use-cases/movies/delete-all'
 dotenv.config()
 
 /** ESTABLISHING HTTP CONNECTION */
@@ -39,7 +41,9 @@ dotenv.config()
             new AddMovie(movieRepo),
             new RetrieveMovies(movieRepo),
             new UpdateMovie(movieRepo),
-            new DeleteMovie(movieRepo)
+            new DeleteMovie(movieRepo),
+            new GetMovieDetails(movieRepo),
+            new DeleteAllMovies(movieRepo)
         )
         server.use('/movies', movieRoute)
     }
