@@ -15,8 +15,13 @@ export function createAuthRouter(login: LoginUseCaseIf, register: SignUpUseCaseI
             res.status(201).json({ ok: true })
         } catch (err) {
             if (err instanceof Error) {
-                Logger.log('error', err.message)
-                res.status(500).json({ ok: false, error: err.message })
+                if (err.message != 'Conflict') {
+                    Logger.log('error', err.message)
+                    res.status(500).json({ ok: false, reason: err.message })
+                } else {
+                    Logger.log('info', err.message)
+                    res.status(409).json({ ok: false, reason: err.message })
+                }
             }
         }
     })
@@ -31,26 +36,30 @@ export function createAuthRouter(login: LoginUseCaseIf, register: SignUpUseCaseI
 
                 const token = jwt
                     .create({ ...result }, process.env.ACCESS_TOKEN_SECRET)
-                    .setExpiration(new Date().getTime() + 60 * 60 * 1000 * 12)
+                    .setExpiration(new Date().getTime() + 60 * 60 * 1000 * 168)
                     .compact()
                 res.status(200).json({ ok: true, token })
                 return
             }
-            Logger.log('warn', 'Missing query parameter/s')
-            res.status(400).json({ error: 'Missing query parameter/s' })
+            Logger.log('info', 'Missing query parameter/s')
+            res.status(400).json({ ok: false, error: 'Missing query parameter/s' })
         } catch (err) {
             if (err instanceof Error) {
-                Logger.log('error', err.message)
-                if (err.message == 'Wrong Password') res.status(401).json({ reason: "Passwords doesn't match." })
-                else res.status(500).json({ reason: err.message })
+                if (!['NotFound', 'Unauthorized'].includes(err.message)) {
+                    Logger.log('error', err.message)
+                    res.status(500).json({ ok: false, reason: err.message })
+                } else {
+                    Logger.log('info', err.message)
+                    res.status(err.message === 'NotFound' ? 404 : 401).json({ ok: false, reason: err.message })
+                }
             }
         }
     })
 
     /** PREVENT OTHER REQUEST TYPE */
     router.all('/', (res: Response) => {
-        Logger.log('warn', 'Request method not allowed/implemented.')
-        res.status(501).end()
+        Logger.log('error', 'Request method not allowed/implemented.')
+        res.status(501).json({ ok: false, reason: 'Not implemented' })
     })
 
     return router

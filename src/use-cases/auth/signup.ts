@@ -8,12 +8,12 @@ export class Signup implements SignUpUseCaseIf {
 
     async execute(user: UserBase): Promise<void> {
         const alreadyExists = (await this.repository.findUser(user.email)).acknowledged
-        if (alreadyExists) throw new Error('Email already been used')
+        if (alreadyExists) throw new Error('Conflict') // 409?
 
         const { password, ...rest } = user
         const hashedPassword = await encrypt(password)
         const hashedUser = { password: hashedPassword, ...rest }
         const result = await this.repository.registerUser(hashedUser)
-        if (!result.acknowledged) throw new Error(result.error!)
+        if (!result.acknowledged) throw new Error(result.error!) // 500
     }
 }

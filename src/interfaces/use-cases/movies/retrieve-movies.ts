@@ -1,5 +1,5 @@
-import { MovieResponse } from '@src/models/Movie'
+import { Movies } from '@src/models/Movie'
 
 export interface RetrieveMoviesUseCaseIf {
-    execute(filters: object, search: string): Promise<Array<MovieResponse>>
+    execute(filters: object, search: string, limit?: number, page?: number): Promise<Movies>
 }

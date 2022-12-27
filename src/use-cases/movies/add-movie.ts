@@ -7,6 +7,6 @@ export class AddMovie implements AddMovieUseCaseIf {
 
     async execute(movie: MovieBase): Promise<void> {
         const result = await this.repository.addMovie(movie)
-        if (!result.acknowledged) throw new Error(result.error!)
+        if (!result.acknowledged) throw new Error(result.error!) // 500
     }
 }
