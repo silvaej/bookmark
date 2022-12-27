@@ -1,6 +1,6 @@
 import { Request, Response, Router } from 'express'
 import { Logger } from '@src/utils/logger'
-import { MovieValidator } from '@src/utils/validate'
+import { GetMoviesListValidator, MovieValidator } from '@src/utils/validate'
 import {
     AddMovieUseCaseIf,
     DeleteMovieUseCaseIf,
@@ -49,6 +49,7 @@ export function createMovieRouter(
             const { page, limit, search, ...filter } = req.query
             const parsedLimit = limit ? Number(limit) : undefined
             const parsedPage = page ? Number(page) : undefined
+            GetMoviesListValidator.validatePagination(parsedPage, parsedLimit)
             const data = await retrieve.execute(
                 { ...filter, id },
                 search && typeof search === 'string' ? search : '',
@@ -59,6 +60,11 @@ export function createMovieRouter(
             res.status(200).json({ ok: true, ...data })
         } catch (err) {
             if (err instanceof Error) {
+                if (err instanceof ValidationError) {
+                    Logger.log('info', err.message)
+                    res.status(400).json({ ok: false, error: err.message })
+                    return
+                }
                 if (err.message === 'NotFound') {
                     Logger.log('info', err.message)
                     res.status(404).json({ ok: false, error: 'Resources not found' })
