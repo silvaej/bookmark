@@ -23,3 +23,19 @@ export class MovieValidator {
             throw new ValidationError('Custom tags variable must be an aray')
     }
 }
+
+export class GetMoviesListValidator {
+    public static validatePagination(page?: number, limit?: number) {
+        const pageExists = page !== undefined
+        const limitExists = limit !== undefined
+
+        if ((pageExists && !limitExists) || (!pageExists && limitExists))
+            throw new ValidationError('Page and limit must exist or not exist at the same time')
+
+        if (pageExists && limitExists) {
+            if (isNaN(page) || isNaN(limit)) throw new ValidationError('Page and Limit must be a number')
+
+            if (page <= 0 || limit <= 0) throw new ValidationError('Page and limit must be greater than 0')
+        }
+    }
+}
